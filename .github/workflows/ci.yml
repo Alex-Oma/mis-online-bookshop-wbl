@@ -1,0 +1,162 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    name: Lint + Unit + Integration tests
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: mis_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      DATABASE_URL: postgresql+asyncpg://postgres:test@localhost:5432/mis_test
+      JWT_SECRET_KEY: ci-test-secret-key-do-not-use-in-prod
+      JWT_ALGORITHM: HS256
+      ENVIRONMENT: development
+      LOG_LEVEL: WARNING
+      # Dummy values for config validation — not used in tests
+      OPENCART_DB_HOST: localhost
+      OPENCART_DB_USER: test
+      OPENCART_DB_PASSWORD: test
+      ROZETKA_API_USERNAME: test
+      ROZETKA_API_PASSWORD_B64: dGVzdA==
+      SMTP_USERNAME: test@test.com
+      SMTP_PASSWORD: test
+      ALERT_TO_EMAIL: test@test.com
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Lint with flake8
+        run: |
+          flake8 app/ --max-line-length=100 --ignore=E501,W503 --exclude=__pycache__
+
+      - name: Apply database migrations
+        run: |
+          # Run all migrations in order against the test database
+          pip install psycopg2-binary
+          python - <<'EOF'
+          import psycopg2, glob, os
+          conn = psycopg2.connect("postgresql://postgres:test@localhost:5432/mis_test")
+          conn.autocommit = True
+          cur = conn.cursor()
+          for migration in sorted(glob.glob("migrations/*.sql")):
+              print(f"Running {migration}...")
+              with open(migration) as f:
+                  cur.execute(f.read())
+          conn.close()
+          print("All migrations applied.")
+          EOF
+
+      - name: Run unit tests
+        run: pytest tests/unit/ -v --tb=short
+
+      - name: Run integration tests
+        run: pytest tests/integration/ -v --tb=short
+
+      - name: Run data quality tests
+        run: pytest tests/data_quality/ -v --tb=short
+
+  e2e:
+    name: E2E tests (Playwright)
+    runs-on: ubuntu-latest
+    needs: test
+    if: github.ref == 'refs/heads/main'
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: mis_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      DATABASE_URL: postgresql+asyncpg://postgres:test@localhost:5432/mis_test
+      JWT_SECRET_KEY: ci-test-secret-key
+      JWT_ALGORITHM: HS256
+      ENVIRONMENT: development
+      LOG_LEVEL: WARNING
+      OPENCART_DB_HOST: localhost
+      OPENCART_DB_USER: test
+      OPENCART_DB_PASSWORD: test
+      ROZETKA_API_USERNAME: test
+      ROZETKA_API_PASSWORD_B64: dGVzdA==
+      SMTP_USERNAME: test@test.com
+      SMTP_PASSWORD: test
+      ALERT_TO_EMAIL: test@test.com
+      MIS_BASE_URL: http://localhost:8000
+      MIS_ADMIN_USER: admin
+      MIS_ADMIN_PASS: admin123
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Install Playwright browsers
+        run: playwright install --with-deps chromium
+
+      - name: Apply migrations
+        run: |
+          pip install psycopg2-binary
+          python - <<'EOF'
+          import psycopg2, glob
+          conn = psycopg2.connect("postgresql://postgres:test@localhost:5432/mis_test")
+          conn.autocommit = True
+          cur = conn.cursor()
+          for migration in sorted(glob.glob("migrations/*.sql")):
+              with open(migration) as f:
+                  cur.execute(f.read())
+          conn.close()
+          EOF
+
+      - name: Start MIS backend in background
+        run: |
+          uvicorn app.main:app --host 0.0.0.0 --port 8000 &
+          sleep 5  # wait for startup
+
+      - name: Run E2E tests
+        run: pytest tests/e2e/ -v --tb=short

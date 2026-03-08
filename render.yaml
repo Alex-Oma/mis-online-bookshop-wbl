@@ -1,0 +1,50 @@
+# Render.com infrastructure-as-code
+# Deploy: connect GitHub repo to Render and this file is auto-detected.
+# Docs: https://render.com/docs/render-yaml-spec
+
+services:
+  # ── FastAPI backend + admin UI ────────────────────────────────────────────
+  - type: web
+    name: mis-backend
+    runtime: python
+    plan: starter          # $7/month — always-on required for APScheduler
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    envVars:
+      - key: ENVIRONMENT
+        value: production
+      - key: LOG_LEVEL
+        value: INFO
+      # ── Secrets — set values in Render Dashboard, never commit here ───────
+      - key: DATABASE_URL
+        sync: false
+      - key: JWT_SECRET_KEY
+        sync: false
+      - key: OPENCART_DB_HOST
+        sync: false
+      - key: OPENCART_DB_USER
+        sync: false
+      - key: OPENCART_DB_PASSWORD
+        sync: false
+      - key: OPENCART_DB_NAME
+        value: bookshop
+      - key: ROZETKA_API_USERNAME
+        sync: false
+      - key: ROZETKA_API_PASSWORD_B64
+        sync: false
+      - key: SMTP_HOST
+        value: smtp.gmail.com
+      - key: SMTP_PORT
+        value: "587"
+      - key: SMTP_USERNAME
+        sync: false
+      - key: SMTP_PASSWORD
+        sync: false
+      - key: ALERT_TO_EMAIL
+        sync: false
+      - key: INGESTION_INTERVAL_HOURS
+        value: "6"
+      - key: ALERT_CHECK_INTERVAL_MINUTES
+        value: "30"
+

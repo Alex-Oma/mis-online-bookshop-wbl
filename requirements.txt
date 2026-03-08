@@ -1,0 +1,52 @@
+# Web framework
+fastapi==0.115.6
+uvicorn[standard]==0.32.1
+
+# Database — async PostgreSQL
+asyncpg==0.30.0
+sqlalchemy[asyncio]==2.0.36
+
+# Database — sync MySQL (OpenCart source)
+pymysql==1.1.1
+sqlalchemy==2.0.36
+
+# Data validation
+pydantic==2.10.3
+pydantic-settings==2.7.0
+
+# Authentication
+python-jose[cryptography]==3.3.0
+passlib[bcrypt]==1.7.4
+python-multipart==0.0.20
+
+# HTTP client (Rozetka API)
+httpx==0.28.1
+
+# Scheduling
+apscheduler==3.11.0
+
+# Templating
+jinja2==3.1.4
+
+# Report generation
+openpyxl==3.1.5
+weasyprint==63.1
+
+# Email
+aiosmtplib==3.0.2
+
+# Testing
+pytest==8.3.4
+pytest-asyncio==0.25.0
+pytest-mock==3.14.0
+respx==0.22.0
+httpx==0.28.1
+freezegun==1.5.1
+playwright==1.49.1
+
+# Linting
+flake8==7.1.1
+
+# PDF reading utility (dev only)
+pdfminer.six==20231228
+
