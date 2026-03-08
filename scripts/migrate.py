@@ -15,6 +15,10 @@ import sys
 # Add parent directory to sys.path to import app modules if needed
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
+# Load variables from .env file into os.environ (if .env exists)
+from dotenv import load_dotenv
+load_dotenv(os.path.join(os.path.dirname(__file__), "..", ".env"))
+
 try:
     # We use asyncpg directly for migrations to avoid adding dependencies like Alembic or SQLAlchemy
     import asyncpg
