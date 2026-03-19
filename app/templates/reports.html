@@ -1,0 +1,143 @@
+{% extends "base.html" %}
+{% block title %}Reports — MyEnglishBooks MIS{% endblock %}
+
+{% block content %}
+<h2 class="text-2xl font-bold text-gray-800 mb-6">📄 Reports</h2>
+
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+  <!-- Generate report form -->
+  <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+    <h3 class="text-base font-semibold text-gray-700 mb-4">Generate New Report</h3>
+    <form id="report-form" class="space-y-4">
+
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Report Type</label>
+        <select name="report_type" id="report_type"
+          class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+          <option value="monthly_revenue">Monthly Revenue by Channel</option>
+          <option value="weekly_sales">Weekly Sales Summary</option>
+          <option value="top_books">Top Books by Units Sold</option>
+          <option value="sales_by_category">Sales by Age Group / Category</option>
+          <option value="seasonal_trend">Seasonal Sales Trend</option>
+          <option value="inventory">Inventory Status</option>
+        </select>
+      </div>
+
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">From Date</label>
+          <input type="date" name="from_date" id="from_date" required
+            class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"/>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">To Date</label>
+          <input type="date" name="to_date" id="to_date" required
+            class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"/>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Sales Channel</label>
+          <select name="channel_id"
+            class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <option value="">All Channels</option>
+            {% for ch in channels %}
+            <option value="{{ ch.channel_id }}">{{ ch.channel_name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Format</label>
+          <select name="format"
+            class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <option value="pdf">PDF</option>
+            <option value="xlsx">Excel (.xlsx)</option>
+          </select>
+        </div>
+      </div>
+
+      <div id="report-status" class="hidden text-sm rounded-lg p-3"></div>
+
+      <button type="submit"
+        class="w-full bg-blue-700 hover:bg-blue-800 text-white font-semibold py-2 rounded-lg transition-colors text-sm">
+        Generate Report
+      </button>
+    </form>
+  </div>
+
+  <!-- Recent reports list -->
+  <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+    <h3 class="text-base font-semibold text-gray-700 mb-4">Recent Reports</h3>
+    {% if recent_reports %}
+    <div class="space-y-2 max-h-96 overflow-auto">
+      {% for r in recent_reports %}
+      <div class="flex items-center justify-between p-3 rounded-lg bg-gray-50 hover:bg-gray-100 text-sm">
+        <div>
+          <p class="font-medium text-gray-800">{{ r.report_type | replace('_', ' ') | title }}</p>
+          <p class="text-xs text-gray-500">{{ r.generated_at }} · {{ r.format | upper }}</p>
+        </div>
+        <a href="/reports/download/{{ r.report_id }}"
+           class="text-blue-600 hover:underline text-xs font-medium">
+          ⬇ Download
+        </a>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <p class="text-sm text-gray-400">No reports generated yet.</p>
+    {% endif %}
+  </div>
+
+</div>
+
+<script>
+  // Set default date range to current month
+  const now = new Date();
+  document.getElementById('from_date').value =
+    new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
+  document.getElementById('to_date').value =
+    now.toISOString().split('T')[0];
+
+  document.getElementById('report-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const form = e.target;
+    const statusDiv = document.getElementById('report-status');
+    statusDiv.className = 'text-sm rounded-lg p-3 bg-blue-50 text-blue-700';
+    statusDiv.textContent = '⏳ Generating report…';
+    statusDiv.classList.remove('hidden');
+
+    const payload = {
+      report_type: form.report_type.value,
+      from_date: form.from_date.value,
+      to_date: form.to_date.value,
+      format: form.format.value,
+      channel_id: form.channel_id.value ? parseInt(form.channel_id.value) : null,
+    };
+
+    try {
+      const res = await fetch('/reports/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+        credentials: 'include',
+      });
+      const data = await res.json();
+      if (res.ok) {
+        statusDiv.className = 'text-sm rounded-lg p-3 bg-green-50 text-green-700';
+        statusDiv.innerHTML = `✅ Report ready! <a href="${data.download_url}"
+          class="underline font-medium" download>Click to download</a>`;
+        setTimeout(() => location.reload(), 4000);
+      } else {
+        statusDiv.className = 'text-sm rounded-lg p-3 bg-red-50 text-red-700';
+        statusDiv.textContent = '❌ ' + (data.detail || 'Report generation failed');
+      }
+    } catch (err) {
+      statusDiv.className = 'text-sm rounded-lg p-3 bg-red-50 text-red-700';
+      statusDiv.textContent = '❌ Connection error';
+    }
+  });
+</script>
+{% endblock %}
+

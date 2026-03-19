@@ -1,0 +1,244 @@
+{% extends "base.html" %}
+{% block title %}Dashboard — MyEnglishBooks MIS{% endblock %}
+
+{% block content %}
+<div class="mb-6 flex items-center justify-between">
+  <div>
+    <h2 class="text-2xl font-bold text-gray-800">Dashboard</h2>
+    <p class="text-sm text-gray-500 mt-0.5">
+      Last sync — Website:
+      <strong>{{ kpi.last_sync_website | default('Never', true) }}</strong>
+      &nbsp;·&nbsp; Rozetka:
+      <strong>{{ kpi.last_sync_rozetka | default('Never', true) }}</strong>
+    </p>
+  </div>
+  <button
+    onclick="triggerSync()"
+    class="bg-blue-700 hover:bg-blue-800 text-white text-sm font-medium
+           px-4 py-2 rounded-lg transition-colors"
+  >
+    🔄 Sync Now
+  </button>
+</div>
+
+<!-- ── KPI Cards ──────────────────────────────────────────────────────── -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+
+  <div class="bg-white rounded-xl shadow-sm p-5 border border-gray-100">
+    <p class="text-xs text-gray-500 uppercase tracking-wide">Revenue This Month</p>
+    <p class="text-2xl font-bold text-blue-800 mt-1">
+      ₴{{ "{:,.0f}".format(kpi.total_revenue_mtd | default(0) | float) }}
+    </p>
+    <p class="text-xs text-gray-400 mt-1">Month-to-date (completed orders)</p>
+  </div>
+
+  <div class="bg-white rounded-xl shadow-sm p-5 border border-gray-100">
+    <p class="text-xs text-gray-500 uppercase tracking-wide">Orders This Month</p>
+    <p class="text-2xl font-bold text-green-700 mt-1">
+      {{ kpi.orders_mtd | default(0) }}
+    </p>
+    <p class="text-xs text-gray-400 mt-1">Completed orders MTD</p>
+  </div>
+
+  <div class="bg-white rounded-xl shadow-sm p-5 border border-gray-100">
+    <p class="text-xs text-gray-500 uppercase tracking-wide">Top-Selling Book</p>
+    <p class="text-sm font-semibold text-gray-800 mt-1 leading-tight">
+      {{ kpi.top_book_title | default('—', true) }}
+    </p>
+    <p class="text-xs text-gray-400 mt-1">
+      {{ kpi.top_book_units | default(0) }} units sold this month
+    </p>
+  </div>
+
+  <div class="bg-white rounded-xl shadow-sm p-5 border border-gray-100
+              {% if (kpi.low_stock_count | default(0)) > 0 %}border-l-4 border-l-orange-400{% endif %}">
+    <p class="text-xs text-gray-500 uppercase tracking-wide">Low Stock Alerts</p>
+    <p class="text-2xl font-bold
+              {% if (kpi.low_stock_count | default(0)) > 0 %}text-orange-500{% else %}text-gray-800{% endif %}
+              mt-1">
+      {{ kpi.low_stock_count | default(0) }}
+    </p>
+    <p class="text-xs text-gray-400 mt-1">
+      {% if (kpi.low_stock_count | default(0)) > 0 %}
+        <a href="/admin/alerts" class="text-orange-500 underline">View alerts</a>
+      {% else %}
+        All stock levels OK
+      {% endif %}
+    </p>
+  </div>
+
+</div>
+
+<!-- ── Charts Row 1: Revenue by Channel + Top Books ─────────────────────── -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+
+  <div class="bg-white rounded-xl shadow-sm p-5 border border-gray-100">
+    <h3 class="text-sm font-semibold text-gray-700 mb-4">
+      📈 Revenue by Sales Channel (Monthly)
+      <span class="text-xs text-gray-400 font-normal ml-1">— last 13 months</span>
+    </h3>
+    <canvas id="revenueChart" height="220"></canvas>
+  </div>
+
+  <div class="bg-white rounded-xl shadow-sm p-5 border border-gray-100">
+    <h3 class="text-sm font-semibold text-gray-700 mb-4">
+      📚 Top 10 Books by Units Sold (This Year)
+    </h3>
+    <canvas id="topBooksChart" height="220"></canvas>
+  </div>
+
+</div>
+
+<!-- ── Charts Row 2: Sales by Age Group ──────────────────────────────────── -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+  <div class="bg-white rounded-xl shadow-sm p-5 border border-gray-100">
+    <h3 class="text-sm font-semibold text-gray-700 mb-4">
+      👶→👩 Sales by Age Group / Category (This Year)
+    </h3>
+    <canvas id="categoryChart" height="220"></canvas>
+  </div>
+
+  <div class="bg-white rounded-xl shadow-sm p-5 border border-gray-100">
+    <h3 class="text-sm font-semibold text-gray-700 mb-3">
+      📋 Category Breakdown
+    </h3>
+    <div class="overflow-auto max-h-64">
+      <table class="w-full text-xs">
+        <thead>
+          <tr class="text-left text-gray-500 border-b">
+            <th class="pb-2">Category</th>
+            <th class="pb-2 text-right">Units</th>
+            <th class="pb-2 text-right">Revenue</th>
+            <th class="pb-2 text-right">% of Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in sales_by_category %}
+          <tr class="border-b border-gray-50 hover:bg-gray-50">
+            <td class="py-1.5">
+              {% if row.parent_name %}
+                <span class="text-gray-400">{{ row.parent_name }} › </span>
+              {% endif %}
+              {{ row.category_name }}
+            </td>
+            <td class="py-1.5 text-right">{{ row.units_sold }}</td>
+            <td class="py-1.5 text-right">₴{{ "{:,.0f}".format(row.revenue_uah | float) }}</td>
+            <td class="py-1.5 text-right">{{ row.pct_of_total }}%</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<!-- ── Chart.js data & config ─────────────────────────────────────────────── -->
+<script>
+// --- Revenue by Channel chart ---
+const revData = {{ revenue_by_channel | tojson }};
+
+const revLabels = [...new Set(revData.map(r => r.month_name + ' ' + r.year))];
+const channels  = [...new Set(revData.map(r => r.channel_name))];
+const palette   = { 'Website': '#1d4ed8', 'Rozetka': '#f97316' };
+
+const revDatasets = channels.map(ch => ({
+  label: ch,
+  data: revLabels.map(label => {
+    const row = revData.find(r => r.month_name + ' ' + r.year === label && r.channel_name === ch);
+    return row ? parseFloat(row.total_revenue_uah) : 0;
+  }),
+  backgroundColor: palette[ch] || '#6b7280',
+  borderRadius: 4,
+}));
+
+new Chart(document.getElementById('revenueChart'), {
+  type: 'bar',
+  data: { labels: revLabels, datasets: revDatasets },
+  options: {
+    responsive: true,
+    plugins: { legend: { position: 'top' } },
+    scales: {
+      x: { stacked: false },
+      y: { ticks: { callback: v => '₴' + v.toLocaleString() } }
+    }
+  }
+});
+
+// --- Top Books chart ---
+const topBooks = {{ top_books | tojson }};
+new Chart(document.getElementById('topBooksChart'), {
+  type: 'bar',
+  data: {
+    labels: topBooks.map(b => b.title.length > 30 ? b.title.substring(0,30)+'…' : b.title),
+    datasets: [{
+      label: 'Units Sold',
+      data: topBooks.map(b => b.units_sold),
+      backgroundColor: '#1d4ed8',
+      borderRadius: 4,
+    }]
+  },
+  options: {
+    indexAxis: 'y',
+    responsive: true,
+    plugins: { legend: { display: false } },
+    scales: { x: { beginAtZero: true } }
+  }
+});
+
+// --- Category donut chart ---
+const catData = {{ sales_by_category | tojson }};
+new Chart(document.getElementById('categoryChart'), {
+  type: 'doughnut',
+  data: {
+    labels: catData.map(c => c.category_name),
+    datasets: [{
+      data: catData.map(c => parseFloat(c.revenue_uah)),
+      backgroundColor: [
+        '#1d4ed8','#f97316','#16a34a','#9333ea',
+        '#0891b2','#dc2626','#ca8a04','#0d9488',
+      ],
+    }]
+  },
+  options: {
+    responsive: true,
+    plugins: {
+      legend: { position: 'right', labels: { font: { size: 11 } } },
+      tooltip: {
+        callbacks: {
+          label: ctx => `₴${parseFloat(ctx.raw).toLocaleString()} (${catData[ctx.dataIndex].pct_of_total}%)`
+        }
+      }
+    }
+  }
+});
+
+// --- Trigger manual sync ---
+async function triggerSync() {
+  const btn = event.target;
+  btn.textContent = '⏳ Syncing…';
+  btn.disabled = true;
+  try {
+    const res = await fetch('/ingest/run', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ channels: ['website', 'rozetka'] }),
+      credentials: 'include',
+    });
+    const data = await res.json();
+    if (res.ok) {
+      btn.textContent = '✅ Sync started';
+      setTimeout(() => location.reload(), 3000);
+    } else {
+      btn.textContent = '❌ Failed';
+      alert(data.detail || 'Sync failed');
+    }
+  } catch (e) {
+    btn.textContent = '❌ Error';
+  }
+  setTimeout(() => { btn.textContent = '🔄 Sync Now'; btn.disabled = false; }, 4000);
+}
+</script>
+{% endblock %}
+

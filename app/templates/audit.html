@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}Audit Log — MyEnglishBooks MIS{% endblock %}
+
+{% block content %}
+<h2 class="text-2xl font-bold text-gray-800 mb-6">🔍 Audit Log</h2>
+
+<div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+  <p class="text-sm text-gray-500 mb-4">
+    Showing the last 200 audit events. All user actions are recorded here.
+  </p>
+  <div class="overflow-auto">
+    <table class="w-full text-xs">
+      <thead>
+        <tr class="text-left text-gray-500 border-b">
+          <th class="pb-2 pr-4">Time</th>
+          <th class="pb-2 pr-4">User</th>
+          <th class="pb-2 pr-4">Action</th>
+          <th class="pb-2 pr-4">Resource</th>
+          <th class="pb-2">IP Address</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for log in logs %}
+        <tr class="border-b border-gray-50 hover:bg-gray-50">
+          <td class="py-1.5 pr-4 text-gray-500 whitespace-nowrap">{{ log.created_at }}</td>
+          <td class="py-1.5 pr-4 font-medium">{{ log.username or '—' }}</td>
+          <td class="py-1.5 pr-4">
+            <span class="px-2 py-0.5 rounded-full text-xs font-medium
+              {% if log.action == 'login' %}bg-green-100 text-green-700
+              {% elif log.action == 'generate_report' %}bg-blue-100 text-blue-700
+              {% elif 'ingest' in log.action %}bg-purple-100 text-purple-700
+              {% else %}bg-gray-100 text-gray-600{% endif %}">
+              {{ log.action }}
+            </span>
+          </td>
+          <td class="py-1.5 pr-4 text-gray-600">{{ log.resource or '—' }}</td>
+          <td class="py-1.5 text-gray-400">{{ log.ip_address or '—' }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% if not logs %}
+  <p class="text-sm text-gray-400 text-center py-8">No audit events recorded yet.</p>
+  {% endif %}
+</div>
+{% endblock %}
