@@ -37,6 +37,43 @@ class RozetkaDelivery(BaseModel):
         return Decimal(str(v)) if v is not None else None
 
 
+class RozetkaProductItem(BaseModel):
+    """A product item inside the purchase line inside a Rozetka order."""
+    article: Optional[str] = None
+    catalog_id: Optional[int] = None
+    commission_percent: Optional[Decimal] = None
+    commission_sum: Optional[Decimal] = None
+    id: int                           # item id
+    market_id: Optional[int] = None
+    moderation_status: Optional[int] = None
+    name: Optional[str] = None
+    name_ua: Optional[str] = None
+    photo_preview: Optional[str] = None
+    price: Optional[Decimal] = None
+    price_offer_id: Optional[int] = None
+    price_old: Optional[Decimal] = None
+    producer_id: Optional[int] = None
+    sla_id: Optional[int] = None
+    sla_rz_id: Optional[int] = None
+    sold: Optional[int] = None
+    stock_quantity: Optional[int] = None
+    uploader_offer_id: Optional[int] = None
+    uploader_status: Optional[int] = None
+    url: Optional[str] = None
+
+    @field_validator(
+        "price", "price_old", "commission_sum", mode="before"
+    )
+    @classmethod
+    def clean_decimal(cls, v):
+        """Remove non-breaking spaces and coerce to Decimal."""
+        if v is None:
+            return None
+        if isinstance(v, str):
+            v = v.replace("\xa0", "").replace(",", ".")
+        return Decimal(str(v))
+
+
 class RozetkaOrderItem(BaseModel):
     """A single purchase line inside a Rozetka order (from purchases[] expand)."""
     id: int                           # purchase_id
@@ -44,10 +81,12 @@ class RozetkaOrderItem(BaseModel):
     item_name: Optional[str] = None
     quantity: int = 1
     price: Optional[Decimal] = None   # price per unit
+    price_with_discount: Optional[Decimal] = None
     cost: Optional[Decimal] = None    # total line (price × qty)
     cost_with_discount: Optional[Decimal] = None
+    item: Optional[RozetkaProductItem] = None
 
-    @field_validator("price", "cost", "cost_with_discount", mode="before")
+    @field_validator("price", "price_with_discount", "cost", "cost_with_discount", mode="before")
     @classmethod
     def coerce_decimal(cls, v):
         '''Coerce numeric values to Decimal, handling None.'''

@@ -342,7 +342,7 @@ class Transformer:
         # This is a key metric for understanding the volume of Rozetka order data processed during the transformation.
         orders_count = int(result.split()[-1])
 
-        # Rozetka order lines — match to dim_product by item_name (best-effort)
+        # Rozetka order lines — match to dim_product.source_product_id by stg_rozetka_order_lines.item_id
         # The SQL query inserts order lines from the Rozetka staging table into the fact_order_lines table, linking to products and categories via a LEFT JOIN to get the corresponding product_id and category_id for each line item.
         await conn.execute(
             """
@@ -368,7 +368,7 @@ class Transformer:
                 ON fo.source_order_id = ol.rozetka_order_id
                AND fo.channel_id = 2
             LEFT JOIN core.dim_product prod
-                ON LOWER(TRIM(prod.title)) = LOWER(TRIM(ol.item_name))
+                ON prod.source_product_id = ol.item_id
             ON CONFLICT (source_line_id, channel_id) DO UPDATE SET
                 quantity_sold  = EXCLUDED.quantity_sold,
                 unit_price     = EXCLUDED.unit_price,

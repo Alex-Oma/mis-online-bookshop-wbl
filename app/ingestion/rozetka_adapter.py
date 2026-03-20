@@ -284,7 +284,7 @@ class RozetkaAdapter:
             (
                 order.id,
                 item.id,
-                item.item_id,
+                item.item.price_offer_id, #item.item_id,
                 item.item_name,
                 item.quantity,
                 float(item.price) if item.price else None,
@@ -304,6 +304,7 @@ class RozetkaAdapter:
                     quantity, price, cost, cost_with_discount, raw_json
                 ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
                 ON CONFLICT (purchase_id) DO UPDATE SET
+                    item_id            = EXCLUDED.item_id,
                     quantity           = EXCLUDED.quantity,
                     cost_with_discount = EXCLUDED.cost_with_discount,
                     raw_json           = EXCLUDED.raw_json,

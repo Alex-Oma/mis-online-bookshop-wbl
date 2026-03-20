@@ -51,6 +51,7 @@ class UserRead(BaseModel):
 
 class IngestionRequest(BaseModel):
     '''Request body for /ingest endpoint to trigger data ingestion.'''
+    # from_date: Optional[str] = "2016-08-01"    # YYYY-MM-DD; None = use last sync timestamp
     from_date: Optional[str] = None    # YYYY-MM-DD; None = use last sync timestamp
     to_date: Optional[str] = None      # YYYY-MM-DD; None = now
     channels: list[str] = ["website", "rozetka"]
