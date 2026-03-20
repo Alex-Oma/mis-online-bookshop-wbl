@@ -153,6 +153,15 @@ jobs:
           conn.close()
           EOF
 
+      - name: Seed Admin User
+        run: |
+          pip install asyncpg passlib bcrypt
+          python scripts/create_admin.py
+        env:
+          DATABASE_URL: postgresql://postgres:test@localhost:5432/mis_test
+          MIS_ADMIN_USER: admin
+          MIS_ADMIN_PASS: admin123
+
       - name: Start MIS backend in background
         run: |
           uvicorn app.main:app --host 0.0.0.0 --port 8000 &

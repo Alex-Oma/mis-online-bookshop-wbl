@@ -12,11 +12,6 @@ from app.config import get_settings
 
 _settings = get_settings()
 
-# Set required env vars before app is imported
-# os.environ.setdefault("DATABASE_URL", "postgresql+asyncpg://postgres:test@localhost:5432/mis_test")
-# os.environ.setdefault("JWT_SECRET_KEY", "test-integration-secret")
-# os.environ.setdefault("JWT_ALGORITHM", "HS256")
-
 from app.main import create_app  # noqa: E402
 from app.auth.jwt import create_access_token  # noqa: E402
 
