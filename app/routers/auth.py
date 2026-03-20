@@ -3,8 +3,6 @@ Authentication endpoints for the MIS admin interface. This includes login and lo
 """
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
-
 from fastapi import APIRouter, Depends, HTTPException, Response, status
 
 from app.auth.jwt import create_access_token

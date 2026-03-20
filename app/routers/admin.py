@@ -96,8 +96,8 @@ async def dashboard(
         # Sales by category — current year
         cat_rows = await conn.fetch(
             SALES_BY_CATEGORY
-            .replace(":from_date",  "$1")
-            .replace(":to_date",    "$2")
+            .replace(":from_date", "$1")
+            .replace(":to_date", "$2")
             .replace(":channel_id", "$3"),
             year_from, date_to, None,
         )

@@ -6,7 +6,6 @@ Implements SCD Type 1 (overwrite) for all dimensions.
 Runs after both WebsiteAdapter and RozetkaAdapter have completed.
 """
 import logging
-from datetime import date, datetime
 
 from app.database import get_pool
 

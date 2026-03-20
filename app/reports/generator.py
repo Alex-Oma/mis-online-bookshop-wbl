@@ -124,6 +124,7 @@ class ReportGenerator:
         # asyncpg requires date objects, not strings
         from datetime import date as date_type
         # Convert from_date and to_date from strings to date objects
+
         def _to_date(v):
             if isinstance(v, date_type):
                 return v
@@ -250,11 +251,6 @@ class ReportGenerator:
         styles.byName["Heading6"].fontName = self.PDF_FONT
         styles.byName["Bullet"].fontName = self.PDF_FONT
         styles.byName["Definition"].fontName = self.PDF_FONT
-
-
-        # # Override default font with our Cyrillic-compatible font
-        # for style_name in styles:
-        #     styles[style_name].fontName = self.PDF_FONT
 
         story = []
 
