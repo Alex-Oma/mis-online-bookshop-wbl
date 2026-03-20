@@ -4,7 +4,6 @@ from fastapi import Cookie, Depends, HTTPException, status
 from jose import JWTError
 
 from app.auth.jwt import decode_token
-from app.database import get_db_connection
 
 
 class CurrentUser:
@@ -71,4 +70,3 @@ def require_role(*allowed_roles: str):
     # Return the inner dependency function that will be used in FastAPI routes.
     # This allows us to create reusable role-based access control dependencies.
     return _check
-

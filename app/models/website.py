@@ -123,4 +123,3 @@ class OcCustomer(BaseModel):
     date_added: Optional[datetime] = None
     is_newsletter: bool = False
     customer_group_name: Optional[str] = None   # joined from oc_customer_group_description
-

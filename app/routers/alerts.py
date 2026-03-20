@@ -145,4 +145,3 @@ async def list_alert_events(
         )
     # Convert each record to a dictionary before returning the list of alert events
     return [dict(r) for r in rows]
-

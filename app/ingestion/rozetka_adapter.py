@@ -284,7 +284,7 @@ class RozetkaAdapter:
             (
                 order.id,
                 item.id,
-                item.item.price_offer_id, #item.item_id,
+                item.item.price_offer_id,
                 item.item_name,
                 item.quantity,
                 float(item.price) if item.price else None,
@@ -370,4 +370,3 @@ class RozetkaAdapter:
                 error,
                 sync_id,
             )
-

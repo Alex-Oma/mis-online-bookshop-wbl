@@ -56,4 +56,3 @@ async def get_db_connection():
     # Use the pool's acquire() method to get a connection, and ensure it is released back to the pool after use.
     async with pool.acquire() as conn:
         yield conn
-

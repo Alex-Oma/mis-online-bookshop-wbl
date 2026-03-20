@@ -135,12 +135,12 @@ class ReportGenerator:
 
         # Map report types to their corresponding SQL queries and parameters
         query_map = {
-            "weekly_sales":      (Q.WEEKLY_SALES_SUMMARY, {}),
-            "monthly_revenue":   (Q.REVENUE_BY_CHANNEL,   {"from_date": fd, "to_date": td}),
-            "top_books":         (Q.TOP_BOOKS,             {"from_date": fd, "to_date": td, "channel_id": channel_id, "limit": 50}),
-            "sales_by_category": (Q.SALES_BY_CATEGORY,    {"from_date": fd, "to_date": td, "channel_id": channel_id}),
-            "seasonal_trend":    (Q.SEASONAL_TREND,        {"from_date": fd, "to_date": td, "channel_id": channel_id}),
-            "inventory":         (Q.INVENTORY_STATUS,      {"status": "active", "category_id": category_id}),
+            "weekly_sales": (Q.WEEKLY_SALES_SUMMARY, {}),
+            "monthly_revenue": (Q.REVENUE_BY_CHANNEL, {"from_date": fd, "to_date": td}),
+            "top_books": (Q.TOP_BOOKS, {"from_date": fd, "to_date": td, "channel_id": channel_id, "limit": 50}),
+            "sales_by_category": (Q.SALES_BY_CATEGORY, {"from_date": fd, "to_date": td, "channel_id": channel_id}),
+            "seasonal_trend": (Q.SEASONAL_TREND, {"from_date": fd, "to_date": td, "channel_id": channel_id}),
+            "inventory": (Q.INVENTORY_STATUS, {"status": "active", "category_id": category_id}),
         }
         # Get the SQL and parameters for the requested report type
         sql, params = query_map[report_type]
@@ -308,19 +308,19 @@ class ReportGenerator:
             table = Table(table_data, colWidths=[col_w] * len(columns), repeatRows=1)
             table.setStyle(TableStyle([
                 # Header row
-                ("BACKGROUND",   (0, 0), (-1, 0),  colors.HexColor("#1F4E79")),
-                ("TEXTCOLOR",    (0, 0), (-1, 0),  colors.white),
-                ("FONTNAME",     (0, 0), (-1, 0),  self.PDF_FONT),
-                ("FONTSIZE",     (0, 0), (-1, 0),  9),
-                ("ALIGN",        (0, 0), (-1, 0),  "CENTER"),
-                ("BOTTOMPADDING",(0, 0), (-1, 0),  6),
+                ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#1F4E79")),
+                ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
+                ("FONTNAME", (0, 0), (-1, 0), self.PDF_FONT),
+                ("FONTSIZE", (0, 0), (-1, 0), 9),
+                ("ALIGN", (0, 0), (-1, 0), "CENTER"),
+                ("BOTTOMPADDING", (0, 0), (-1, 0), 6),
                 # Data rows - Note: Paragraph content handles its own font/size,
                 # but we keep table styling for backgrounds and grids.
-                ("VALIGN",       (0, 1), (-1, -1), "TOP"),
-                ("ROWBACKGROUNDS",(0, 1), (-1, -1), [colors.white, colors.HexColor("#F5F8FC")]),
-                ("GRID",         (0, 0), (-1, -1), 0.4, colors.HexColor("#DDDDDD")),
-                ("TOPPADDING",   (0, 1), (-1, -1), 4),
-                ("BOTTOMPADDING",(0, 1), (-1, -1), 4),
+                ("VALIGN", (0, 1), (-1, -1), "TOP"),
+                ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.white, colors.HexColor("#F5F8FC")]),
+                ("GRID", (0, 0), (-1, -1), 0.4, colors.HexColor("#DDDDDD")),
+                ("TOPPADDING", (0, 1), (-1, -1), 4),
+                ("BOTTOMPADDING", (0, 1), (-1, -1), 4),
             ]))
             story.append(table)
 

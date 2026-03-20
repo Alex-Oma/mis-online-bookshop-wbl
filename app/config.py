@@ -81,4 +81,3 @@ class Settings(BaseSettings):
 def get_settings() -> Settings:
     # Cached function to return a Settings instance, ensuring environment variables are read only once.
     return Settings()
-

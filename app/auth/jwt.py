@@ -46,4 +46,3 @@ def extract_role(token: str) -> Optional[str]:
         return payload.get("role")
     except JWTError:
         return None
-

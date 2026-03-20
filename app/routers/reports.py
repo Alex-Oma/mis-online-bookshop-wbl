@@ -139,4 +139,3 @@ async def list_reports(
         )
     # Convert the result rows to a list of dictionaries and return it as the response. Each dictionary represents a report with its details.
     return [dict(r) for r in rows]
-

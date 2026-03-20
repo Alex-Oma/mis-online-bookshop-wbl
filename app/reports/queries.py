@@ -206,4 +206,3 @@ WHERE fo.date_added >= NOW() - INTERVAL '7 days'
 GROUP BY sc.channel_name
 ORDER BY revenue_uah DESC
 """
-

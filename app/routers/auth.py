@@ -12,8 +12,6 @@ from app.auth.password import verify_password
 from app.database import get_db_connection
 from app.models.mis import LoginRequest, TokenResponse
 
-if TYPE_CHECKING:
-    import asyncpg
 
 # Create a router for auth-related endpoints
 router = APIRouter()
@@ -98,4 +96,3 @@ async def logout(response: Response):
     """Clear the auth cookie."""
     response.delete_cookie("access_token")
     return {"message": "Logged out successfully"}
-

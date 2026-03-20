@@ -98,4 +98,3 @@ def stop_scheduler() -> None:
         _scheduler.shutdown(wait=False)
         # Log that the scheduler has been stopped. This is useful for confirming that the shutdown process has completed.
         logger.info("Scheduler stopped")
-

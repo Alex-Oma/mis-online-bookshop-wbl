@@ -31,10 +31,10 @@ class Transformer:
         # Then transform facts (orders and order lines) which depend on the dimensions being up-to-date
         # for correct foreign key relationships and data integrity.
         async with pool.acquire() as conn:
-            stats["publishers"]  = await self._transform_publishers(conn)
-            stats["categories"]  = await self._transform_categories(conn)
-            stats["products"]    = await self._transform_products(conn)
-            stats["customers"]   = await self._transform_customers(conn)
+            stats["publishers"] = await self._transform_publishers(conn)
+            stats["categories"] = await self._transform_categories(conn)
+            stats["products"] = await self._transform_products(conn)
+            stats["customers"] = await self._transform_customers(conn)
             stats["order_statuses"] = await self._transform_order_statuses(conn)
             stats["website_orders"] = await self._transform_website_orders(conn)
             stats["rozetka_orders"] = await self._transform_rozetka_orders(conn)
@@ -379,4 +379,3 @@ class Transformer:
         # The order lines are inserted or updated based on the source_line_id and channel_id.
         # The quantity_sold, unit_price, line_total, and line_total_uah fields are updated to reflect any changes in the order lines from the staging data.
         return orders_count
-

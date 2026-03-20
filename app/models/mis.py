@@ -6,7 +6,7 @@ from datetime import datetime
 from decimal import Decimal
 from typing import Optional
 
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, Field
 
 
 # ── Auth ──────────────────────────────────────────────────────────────────────
@@ -77,8 +77,8 @@ class ReportRequest(BaseModel):
     from_date: str                     # YYYY-MM-DD
     to_date: str                       # YYYY-MM-DD
     format: str = "pdf"                # pdf | xlsx
-    channel_id: Optional[int] = None  # None = all channels
-    category_id: Optional[int] = None # None = all categories
+    channel_id: Optional[int] = None   # None = all channels
+    category_id: Optional[int] = None  # None = all categories
 
 
 class ReportResponse(BaseModel):
@@ -167,4 +167,3 @@ class SalesByAgeGroupRow(BaseModel):
     units_sold: int
     revenue_uah: Decimal
     pct_of_total: float
-

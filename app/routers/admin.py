@@ -74,7 +74,7 @@ async def dashboard(
 
         # date objects required — asyncpg cannot bind bare strings to date columns
         date_from = date(2015, 1, 1)   # covers full history since business started
-        date_to   = date(2099, 12, 31) # open-ended upper bound
+        date_to = date(2099, 12, 31)  # open-ended upper bound
 
         # Revenue by channel — all history
         rev_rows = await conn.fetch(
@@ -86,10 +86,10 @@ async def dashboard(
         year_from = date(date.today().year, 1, 1)
         top_rows = await conn.fetch(
             TOP_BOOKS
-            .replace(":from_date",  "$1")
-            .replace(":to_date",    "$2")
+            .replace(":from_date", "$1")
+            .replace(":to_date", "$2")
             .replace(":channel_id", "$3")
-            .replace(":limit",      "$4"),
+            .replace(":limit", "$4"),
             year_from, date_to, None, 10,
         )
 
@@ -226,7 +226,6 @@ async def audit_log_page(request: Request, current_user=Depends(get_current_user
         {
             "request": request,
             "user": current_user,
-            "logs": [dict(l) for l in logs],
+            "logs": [dict(log) for log in logs],
         },
     )
-

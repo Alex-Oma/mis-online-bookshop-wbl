@@ -288,12 +288,12 @@ class WebsiteAdapter:
         # We prepare the records for upsert by converting each OcOrderProduct model into a tuple of values corresponding to the staging table columns.
         records = [
             (
-                l.order_product_id, l.order_id, l.product_id,
-                l.name, l.model, l.quantity,
-                float(l.price), float(l.total), float(l.tax),
-                json.dumps(l.model_dump(mode="json")),
+                line.order_product_id, line.order_id, line.product_id,
+                line.name, line.model, line.quantity,
+                float(line.price), float(line.total), float(line.tax),
+                json.dumps(line.model_dump(mode="json")),
             )
-            for l in lines
+            for line in lines
         ]
         # We use asyncpg's executemany to perform a bulk upsert into the staging.stg_website_order_lines table.
         async with pool.acquire() as conn:
@@ -487,4 +487,3 @@ class WebsiteAdapter:
                 error,
                 sync_id,
             )
-

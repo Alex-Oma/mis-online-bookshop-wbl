@@ -317,4 +317,3 @@ class AlertEngine:
             # If an error occurs during the email sending process, it is caught and logged as an error with details about the recipient and the exception message.
             # This ensures that issues with email delivery are recorded for troubleshooting without crashing the alert engine.
             logger.error("Failed to send alert email to %s: %s", to, exc)
-

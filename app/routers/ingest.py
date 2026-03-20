@@ -156,4 +156,3 @@ async def _run_ingestion(
         job.status = "failed"
         job.error_detail = str(exc)
         job.completed_at = datetime.now()
-
