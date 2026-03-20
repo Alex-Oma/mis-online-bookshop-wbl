@@ -13,8 +13,10 @@ from openpyxl.styles import Alignment, Font, PatternFill
 # ReportLab — pure Python PDF generation, works on Windows with no system libs
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import A4, landscape
-from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.units import cm
+from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.platypus import (
     Paragraph, SimpleDocTemplate, Spacer, Table, TableStyle,
 )
@@ -33,12 +35,26 @@ os.makedirs(REPORTS_DIR, exist_ok=True)
 class ReportGenerator:
     """Generates PDF and Excel reports from analytical SQL queries."""
 
+    # Register custom font (DejaVuSans) to support Cyrillic characters
+    try:
+        # Path where we downloaded the font
+        FONT_PATH = os.path.join("app", "static", "fonts", "DejaVuSans.ttf")
+        if os.path.exists(FONT_PATH):
+            pdfmetrics.registerFont(TTFont("DejaVuSans", FONT_PATH))
+            PDF_FONT = "DejaVuSans"
+        else:
+            logger.warning("DejaVuSans font not found at %s, falling back to Helvetica", FONT_PATH)
+            PDF_FONT = "Helvetica"
+    except Exception as e:
+        logger.warning("Failed to load custom font: %s", e)
+        PDF_FONT = "Helvetica"
+
     # Pre-defined report types and their human-readable titles
     SUPPORTED_TYPES = {
         "weekly_sales": "Weekly Sales Summary",
         "monthly_revenue": "Monthly Revenue by Channel",
         "top_books": "Top Books by Units Sold",
-        "sales_by_category": "Sales by Age Group / Category",
+        "sales_by_category": "Sales by Age Group and Category",
         "seasonal_trend": "Seasonal Sales Trend",
         "inventory": "Inventory Status Report",
     }
@@ -222,6 +238,24 @@ class ReportGenerator:
         )
         # Get default styles and prepare the story (content) list
         styles = getSampleStyleSheet()
+        styles.byName["Normal"].fontName = self.PDF_FONT
+        styles.byName["BodyText"].fontName = self.PDF_FONT
+        styles.byName["Italic"].fontName = self.PDF_FONT
+        styles.byName["Title"].fontName = self.PDF_FONT
+        styles.byName["Heading1"].fontName = self.PDF_FONT
+        styles.byName["Heading2"].fontName = self.PDF_FONT
+        styles.byName["Heading3"].fontName = self.PDF_FONT
+        styles.byName["Heading4"].fontName = self.PDF_FONT
+        styles.byName["Heading5"].fontName = self.PDF_FONT
+        styles.byName["Heading6"].fontName = self.PDF_FONT
+        styles.byName["Bullet"].fontName = self.PDF_FONT
+        styles.byName["Definition"].fontName = self.PDF_FONT
+
+
+        # # Override default font with our Cyrillic-compatible font
+        # for style_name in styles:
+        #     styles[style_name].fontName = self.PDF_FONT
+
         story = []
 
         # ── Title ─────────────────────────────────────────────────────────────
@@ -247,10 +281,24 @@ class ReportGenerator:
         else:
             # ── Table header + data rows ───────────────────────────────────────
             header = [col.replace("_", " ").title() for col in columns]
-            table_data = [header] + [
-                [str(row.get(col, "") or "") for col in columns]
-                for row in rows
-            ]
+
+            # Create a specific style for table cells that enables wrapping
+            cell_style = ParagraphStyle(
+                name="TableCell",
+                parent=styles["Normal"],
+                fontSize=8,
+                leading=10,
+            )
+
+            # Wrap cell content in Paragraph objects to enforce text wrapping within columns
+            table_data = [header]
+            for row in rows:
+                row_list = []
+                for col in columns:
+                    val = row.get(col, "")
+                    text = str(val) if val is not None else ""
+                    row_list.append(Paragraph(text, cell_style))
+                table_data.append(row_list)
 
             # Calculate column widths to fill the page
             page_w = pagesize[0] - 3 * cm  # total usable width
@@ -262,14 +310,13 @@ class ReportGenerator:
                 # Header row
                 ("BACKGROUND",   (0, 0), (-1, 0),  colors.HexColor("#1F4E79")),
                 ("TEXTCOLOR",    (0, 0), (-1, 0),  colors.white),
-                ("FONTNAME",     (0, 0), (-1, 0),  "Helvetica-Bold"),
+                ("FONTNAME",     (0, 0), (-1, 0),  self.PDF_FONT),
                 ("FONTSIZE",     (0, 0), (-1, 0),  9),
                 ("ALIGN",        (0, 0), (-1, 0),  "CENTER"),
                 ("BOTTOMPADDING",(0, 0), (-1, 0),  6),
-                # Data rows
-                ("FONTNAME",     (0, 1), (-1, -1), "Helvetica"),
-                ("FONTSIZE",     (0, 1), (-1, -1), 8),
-                ("ALIGN",        (0, 1), (-1, -1), "LEFT"),
+                # Data rows - Note: Paragraph content handles its own font/size,
+                # but we keep table styling for backgrounds and grids.
+                ("VALIGN",       (0, 1), (-1, -1), "TOP"),
                 ("ROWBACKGROUNDS",(0, 1), (-1, -1), [colors.white, colors.HexColor("#F5F8FC")]),
                 ("GRID",         (0, 0), (-1, -1), 0.4, colors.HexColor("#DDDDDD")),
                 ("TOPPADDING",   (0, 1), (-1, -1), 4),
@@ -315,4 +362,3 @@ class ReportGenerator:
                 report_type, format, params_json, file_path, generated_by,
             )
         return row["report_id"]
-
