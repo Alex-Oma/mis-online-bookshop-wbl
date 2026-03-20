@@ -27,7 +27,7 @@ class Settings(BaseSettings):
     jwt_expire_hours: int = Field(default=8, alias="JWT_EXPIRE_HOURS")
 
     # MIS Database (Supabase / PostgreSQL — async asyncpg URL)
-    database_url: str = Field(alias="DATABASE_URL")
+    database_url: str = Field(default="", alias="DATABASE_URL")
 
     # MIS Database — optional sync URL (used by SQLAlchemy sync engine if needed)
     # If not set in .env it is auto-derived from database_url
@@ -51,7 +51,7 @@ class Settings(BaseSettings):
 
     # Rozetka API
     rozetka_api_base_url: str = Field(
-        default="https://api.seller.rozetka.com.ua",
+        default="https://api-seller.rozetka.com.ua",
         alias="ROZETKA_API_BASE_URL",
     )
     rozetka_api_username: str = Field(default="", alias="ROZETKA_API_USERNAME")
@@ -71,6 +71,10 @@ class Settings(BaseSettings):
         default=30, alias="ALERT_CHECK_INTERVAL_MINUTES"
     )
 
+    # Settings for the tests
+    mis_base_url: str = Field(default="", alias="MIS_BASE_URL")
+    mis_admin_user: str = Field(default="admin", alias="MIS_ADMIN_USER")
+    mis_admin_password: str = Field(default="admin123", alias="MIS_ADMIN_PASSWORD")
 
 
 @lru_cache
