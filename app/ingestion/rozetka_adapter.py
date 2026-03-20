@@ -81,9 +81,16 @@ class RozetkaAdapter:
             "username": self._settings.rozetka_api_username,
             "password": self._settings.rozetka_api_password_b64,  # already base64
         }
+
+        # Set the appropriate headers for a JSON request. The API expects JSON body and returns JSON response.
+        headers = {
+            "Content-Type": "application/json",
+            "Accept": "application/json",
+        }
+
         # Use httpx to make an async POST request to the auth endpoint with a reasonable timeout.
         async with httpx.AsyncClient(timeout=30) as client:
-            resp = await client.post(url, json=payload)
+            resp = await client.post(url, json=payload, headers=headers)
             resp.raise_for_status()
             data = resp.json()
 
@@ -166,7 +173,7 @@ class RozetkaAdapter:
             "sort": "created",                          # oldest first for consistent pagination
             "created_from": created_from,
             "expand": "purchases,delivery",
-            "type": 1,                                  # all order groups
+            "types": 1,                                  # all order groups
         }
         # If a created_to date is provided, include it in the parameters to limit the date range of fetched orders.
         if created_to:

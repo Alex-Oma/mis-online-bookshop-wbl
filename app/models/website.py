@@ -85,6 +85,14 @@ class OcProduct(BaseModel):
         '''Coerce numeric values to Decimal, treating None as 0.'''
         return Decimal(str(v)) if v is not None else Decimal("0")
 
+    @field_validator("date_available", mode="before")
+    @classmethod
+    def coerce_date_available(cls, v):
+        """Handle OpenCart zero-date placeholders like '0000-00-00'."""
+        if v in (None, "", "0000-00-00", "0000-00-00 00:00:00"):
+            return None
+        return v
+
 
 class OcCategory(BaseModel):
     """Mirrors oc_category joined with oc_category_description (language_id=1)."""

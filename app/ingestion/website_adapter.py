@@ -68,7 +68,7 @@ SELECT
     ptc.category_id AS main_category_id
 FROM oc_product p
 LEFT JOIN oc_product_description pd
-    ON pd.product_id = p.product_id AND pd.language_id = 1
+    ON pd.product_id = p.product_id AND pd.language_id = 3
 LEFT JOIN oc_product_to_category ptc
     ON ptc.product_id = p.product_id AND ptc.main_category = 1
 WHERE p.date_modified >= :since
@@ -82,7 +82,7 @@ SELECT
     cd.name, cd.description
 FROM oc_category c
 LEFT JOIN oc_category_description cd
-    ON cd.category_id = c.category_id AND cd.language_id = 1
+    ON cd.category_id = c.category_id AND cd.language_id = 3
 """
 
 # This SQL retrieves all manufacturers along with their descriptions.
@@ -92,7 +92,7 @@ SELECT
     md.description
 FROM oc_manufacturer m
 LEFT JOIN oc_manufacturer_description md
-    ON md.manufacturer_id = m.manufacturer_id AND md.language_id = 1
+    ON md.manufacturer_id = m.manufacturer_id AND md.language_id = 3
 """
 
 # This SQL retrieves all customers modified since the last sync, along with their group and newsletter subscription status.
@@ -104,7 +104,7 @@ SELECT
     cgd.name AS customer_group_name
 FROM oc_customer c
 LEFT JOIN oc_customer_group_description cgd
-    ON cgd.customer_group_id = c.customer_group_id AND cgd.language_id = 1
+    ON cgd.customer_group_id = c.customer_group_id AND cgd.language_id = 3
 WHERE c.date_added >= :since
 """
 
