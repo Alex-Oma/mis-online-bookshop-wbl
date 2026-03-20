@@ -12,9 +12,9 @@ from app.config import get_settings
 
 _settings = get_settings()
 
-# DATABASE_URL = _settings.database_url
+DATABASE_URL = _settings.database_url
 # os.environ.setdefault("DATABASE_URL", "postgresql://postgres:test@localhost:5432/mis_test")
-DATABASE_URL = "postgresql://postgres:test@localhost:5432/mis_test"
+# DATABASE_URL = "postgresql://postgres:test@localhost:5432/mis_test"
 
 @pytest.fixture
 async def conn():

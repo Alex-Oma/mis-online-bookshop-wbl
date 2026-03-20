@@ -27,18 +27,18 @@ class Settings(BaseSettings):
     jwt_expire_hours: int = Field(default=8, alias="JWT_EXPIRE_HOURS")
 
     # MIS Database (Supabase / PostgreSQL — async asyncpg URL)
-    database_url: str = Field(default="", alias="DATABASE_URL")
+    database_url: str = Field(default="postgresql://postgres:test@localhost:5432/mis_test", alias="DATABASE_URL")
 
     # MIS Database — optional sync URL (used by SQLAlchemy sync engine if needed)
     # If not set in .env it is auto-derived from database_url
     database_url_sync: str = Field(default="", alias="DATABASE_URL_SYNC")
 
     # OpenCart MySQL (website source — read-only)
-    opencart_db_host: str = Field(default="", alias="OPENCART_DB_HOST")
+    opencart_db_host: str = Field(default="localhost", alias="OPENCART_DB_HOST")
     opencart_db_port: int = Field(default=3306, alias="OPENCART_DB_PORT")
     opencart_db_name: str = Field(default="bookshop", alias="OPENCART_DB_NAME")
-    opencart_db_user: str = Field(default="", alias="OPENCART_DB_USER")
-    opencart_db_password: str = Field(default="", alias="OPENCART_DB_PASSWORD")
+    opencart_db_user: str = Field(default="test", alias="OPENCART_DB_USER")
+    opencart_db_password: str = Field(default="test", alias="OPENCART_DB_PASSWORD")
 
     @property
     def opencart_db_url(self) -> str:
@@ -54,16 +54,16 @@ class Settings(BaseSettings):
         default="https://api-seller.rozetka.com.ua",
         alias="ROZETKA_API_BASE_URL",
     )
-    rozetka_api_username: str = Field(default="", alias="ROZETKA_API_USERNAME")
-    rozetka_api_password_b64: str = Field(default="", alias="ROZETKA_API_PASSWORD_B64")
+    rozetka_api_username: str = Field(default="test", alias="ROZETKA_API_USERNAME")
+    rozetka_api_password_b64: str = Field(default="dGVzdA==", alias="ROZETKA_API_PASSWORD_B64")
 
     # Email alerts
     smtp_host: str = Field(default="smtp.gmail.com", alias="SMTP_HOST")
     smtp_port: int = Field(default=587, alias="SMTP_PORT")
-    smtp_username: str = Field(default="", alias="SMTP_USERNAME")
-    smtp_password: str = Field(default="", alias="SMTP_PASSWORD")
+    smtp_username: str = Field(default="test@test.com", alias="SMTP_USERNAME")
+    smtp_password: str = Field(default="test", alias="SMTP_PASSWORD")
     smtp_from_name: str = Field(default="MyEnglishBooks MIS", alias="SMTP_FROM_NAME")
-    alert_to_email: str = Field(default="", alias="ALERT_TO_EMAIL")
+    alert_to_email: str = Field(default="test@test.com", alias="ALERT_TO_EMAIL")
 
     # Scheduler
     ingestion_interval_hours: int = Field(default=6, alias="INGESTION_INTERVAL_HOURS")
@@ -72,7 +72,7 @@ class Settings(BaseSettings):
     )
 
     # Settings for the tests
-    mis_base_url: str = Field(default="", alias="MIS_BASE_URL")
+    mis_base_url: str = Field(default="http://localhost:8000", alias="MIS_BASE_URL")
     mis_admin_user: str = Field(default="admin", alias="MIS_ADMIN_USER")
     mis_admin_password: str = Field(default="admin123", alias="MIS_ADMIN_PASSWORD")
 
