@@ -20,16 +20,22 @@ async def get_pool() -> Pool:
     if _pool is None:
         # Read the database URL from settings and create the connection pool
         settings = get_settings()
-        # Strip the SQLAlchemy driver prefix if present
-        dsn = settings.database_url.replace(
-            "postgresql+asyncpg://", "postgresql://"
-        )
+
+        # The database URL (DSN) is expected to be in the format:
+        # postgresql://user:password@host:port/database
+        dsn = settings.database_url
+
+        # Determine SSL requirement based on environment
+        # Production/Supabase requires SSL. Development env doesn't require SSL.
+        ssl_mode = "require" if settings.environment == "production" else None
+
         # Create the asyncpg connection pool with appropriate settings
         _pool = await asyncpg.create_pool(
             dsn=dsn,
             min_size=2,
             max_size=10,
             command_timeout=60,
+            ssl=ssl_mode,
         )
         # Log the successful creation of the pool
         logger.info("Database connection pool created")
