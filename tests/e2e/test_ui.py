@@ -12,6 +12,7 @@ import pytest
 from playwright.sync_api import Page, expect
 from app.config import get_settings
 
+# Getting all configuration from environment variables for flexibility in CI and local testing
 _settings = get_settings()
 
 BASE_URL = _settings.mis_base_url

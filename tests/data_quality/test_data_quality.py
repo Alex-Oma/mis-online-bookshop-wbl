@@ -9,12 +9,10 @@ import pytest
 import asyncpg
 from app.config import get_settings
 
-
+# Getting all configuration from environment variables for flexibility in CI and local testing
 _settings = get_settings()
 
 DATABASE_URL = _settings.database_url
-# os.environ.setdefault("DATABASE_URL", "postgresql://postgres:test@localhost:5432/mis_test")
-# DATABASE_URL = "postgresql://postgres:test@localhost:5432/mis_test"
 
 @pytest.fixture
 async def conn():

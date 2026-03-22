@@ -10,6 +10,7 @@ import pytest
 from fastapi.testclient import TestClient
 from app.config import get_settings
 
+# Getting all configuration from environment variables for flexibility in CI and local testing
 _settings = get_settings()
 
 from app.main import create_app  # noqa: E402
@@ -31,6 +32,7 @@ def _cookie(role: str = "admin") -> dict:
 # ── Health ────────────────────────────────────────────────────────────────────
 
 def test_health_check(client):
+    '''Verify that the /health endpoint returns status ok.'''
     resp = client.get("/health")
     assert resp.status_code == 200
     assert resp.json()["status"] == "ok"
@@ -39,6 +41,7 @@ def test_health_check(client):
 # ── Auth ──────────────────────────────────────────────────────────────────────
 
 def test_login_invalid_credentials_returns_401(client):
+    '''Verify that login with invalid credentials returns 401 Unauthorized.'''
     with patch("app.routers.auth.get_db_connection") as mock_dep:
         mock_conn = AsyncMock()
         mock_conn.fetchrow.return_value = None
@@ -48,6 +51,7 @@ def test_login_invalid_credentials_returns_401(client):
 
 
 def test_logout_succeeds(client):
+    '''Verify that the /auth/logout endpoint returns 200 OK for an authenticated user.'''
     resp = client.post("/auth/logout")
     assert resp.status_code == 200
 
@@ -55,6 +59,7 @@ def test_logout_succeeds(client):
 # ── RBAC ──────────────────────────────────────────────────────────────────────
 
 def test_viewer_cannot_trigger_ingest(client):
+    '''Verify that a user with the "viewer" role cannot access the /ingest/run endpoint.'''
     resp = client.post(
         "/ingest/run",
         json={"channels": ["website"]},
@@ -64,6 +69,7 @@ def test_viewer_cannot_trigger_ingest(client):
 
 
 def test_admin_can_trigger_ingest(client):
+    '''Verify that a user with the "admin" role can access the /ingest/run endpoint and receives a job_id.'''
     with patch("app.routers.ingest._run_ingestion", new_callable=AsyncMock):
         resp = client.post(
             "/ingest/run",
@@ -75,6 +81,7 @@ def test_admin_can_trigger_ingest(client):
 
 
 def test_viewer_cannot_create_alert_rule(client):
+    '''Verify that a user with the "viewer" role cannot access the /alerts/rules endpoint to create a new alert rule.'''
     resp = client.post(
         "/alerts/rules",
         json={"rule_type": "low_stock", "rule_name": "Test", "threshold": 5, "cooldown_hours": 24},
@@ -86,6 +93,7 @@ def test_viewer_cannot_create_alert_rule(client):
 # ── Reports ───────────────────────────────────────────────────────────────────
 
 def test_unauthenticated_report_request_returns_401(client):
+    '''Verify that an unauthenticated request to /reports/generate returns 401 Unauthorized.'''
     resp = client.post("/reports/generate", json={
         "report_type": "top_books",
         "from_date": "2026-01-01",
@@ -96,6 +104,7 @@ def test_unauthenticated_report_request_returns_401(client):
 
 
 def test_unknown_report_type_returns_400(client):
+    '''Verify that requesting a report with an unknown report type returns 400 Bad Request.'''
     with patch(
         "app.reports.generator.ReportGenerator.generate",
         new_callable=AsyncMock,
@@ -115,6 +124,7 @@ def test_unknown_report_type_returns_400(client):
 
 
 def test_report_download_not_found(client):
+    '''Verify that requesting a report download with a non-existent report ID returns 404 Not Found.'''
     with patch("app.database.get_pool") as mock_pool:
         mock_conn = AsyncMock()
         mock_conn.fetchrow.return_value = None
