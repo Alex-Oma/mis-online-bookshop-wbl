@@ -23,24 +23,30 @@ services:
         sync: false
       - key: OPENCART_DB_HOST
         sync: false
+      - key: OPENCART_DB_PORT
+        sync: false
+      - key: OPENCART_DB_NAME
+        value: "bookshop"
       - key: OPENCART_DB_USER
         sync: false
       - key: OPENCART_DB_PASSWORD
         sync: false
-      - key: OPENCART_DB_NAME
-        value: bookshop
+      - key: ROZETKA_API_BASE_URL
+        value: "https://api-seller.rozetka.com.ua"
       - key: ROZETKA_API_USERNAME
         sync: false
       - key: ROZETKA_API_PASSWORD_B64
         sync: false
       - key: SMTP_HOST
-        value: smtp.gmail.com
+        sync: false
       - key: SMTP_PORT
         value: "587"
       - key: SMTP_USERNAME
         sync: false
       - key: SMTP_PASSWORD
         sync: false
+      - key: SMTP_FROM_NAME
+        value: "MyEnglishBooks MIS"
       - key: ALERT_TO_EMAIL
         sync: false
       - key: INGESTION_INTERVAL_HOURS
