@@ -1,15 +1,15 @@
 # Render.com infrastructure-as-code
 # Deploy: connect GitHub repo to Render and this file is auto-detected.
-# Docs: https://render.com/docs/render-yaml-spec
+# Docs: https://render.com/docs/blueprint-spec
 
 services:
   # ── FastAPI backend + admin UI ────────────────────────────────────────────
   - type: web
     name: mis-backend
     runtime: python
-    plan: starter          # $7/month — always-on required for APScheduler
+    plan: free
     buildCommand: pip install -r requirements.txt
-    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port 8000
     healthCheckPath: /health
     envVars:
       - key: ENVIRONMENT
