@@ -128,3 +128,4 @@ class RozetkaOrdersPage(BaseModel):
     page_count: int = 1
     current_page: int = 1
     per_page: int = 20
+

@@ -73,8 +73,8 @@ async def dashboard(
         kpi = await conn.fetchrow(KPI_SUMMARY)
 
         # date objects required — asyncpg cannot bind bare strings to date columns
-        date_from = date(2015, 1, 1)   # covers full history since business started
-        date_to = date(2099, 12, 31)  # open-ended upper bound
+        date_from = date(2025, 3, 1)   # covers full history since business started
+        date_to = date(2026, 3, 31)  # open-ended upper bound
 
         # Revenue by channel — all history
         rev_rows = await conn.fetch(

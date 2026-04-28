@@ -54,7 +54,6 @@ async def trigger_ingestion(
         request.to_date,
     )
     # Return the initial job status immediately.
-    # The client can poll this endpoint to get updates on the job's progress.
     return job
 
 
